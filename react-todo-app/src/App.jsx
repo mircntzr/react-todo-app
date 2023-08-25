@@ -3,12 +3,14 @@ import DarkTheme from "./assets/images/bg-desktop-dark.jpg";
 import LightTheme from "./assets/images/bg-desktop-light.jpg";
 import Moon from "./assets/images/icon-moon.svg";
 import Sun from "./assets/images/icon-sun.svg";
+import "./App.css";
 
 const App = () => {
   const [theme, setTheme] = useState("light");
   const [todos, setTodos] = useState([]);
   const [inputText, setInputText] = useState("");
   const [filter, setFilter] = useState("all");
+  const [errorText, setErrorText] = useState("");
 
   const handleThemeChange = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -19,12 +21,18 @@ const App = () => {
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
+    if (e.key === "Enter") {
+      handleAddTodo();
+    }
   };
 
   const handleAddTodo = () => {
     if (inputText.trim() !== "") {
       setTodos([...todos, { text: inputText, completed: false }]);
       setInputText("");
+      setErrorText("");
+    } else {
+      setErrorText("Please enter a todo.");
     }
   };
 
@@ -69,34 +77,16 @@ const App = () => {
 
   const activeItemCount = todos.filter((todo) => !todo.completed).length;
 
-  return (
-    <div
-      className={`container ${theme}`}
-      style={{ backgroundImage: `url(${themeImage})` }}
-    >
-      <header>
-        <h1>Todo App</h1>
-        <button className="theme-toggle" onClick={handleThemeChange}>
-          {theme === "light" ? (
-            <img src={themeIcon} alt="Light Theme" />
-          ) : (
-            <img src={themeIcon} alt="Dark Theme" />
-          )}
-        </button>
-      </header>
-      <div className="input-group">
-        <input
-          type="text"
-          value={inputText}
-          onChange={handleInputChange}
-          placeholder="Enter a todo"
-        />
-        <button onClick={handleAddTodo}>Add</button>
-      </div>
+  let content;
+  if (todos.length === 0) {
+    content = <p>You haven't entered any todos yet. Please add a todo.</p>;
+  } else {
+    content = (
       <ul className="todo-list">
         {filteredTodos.map((todo, index) => (
           <li key={index} className={todo.completed ? "completed" : ""}>
             <input
+              className="checkbox"
               type="checkbox"
               checked={todo.completed}
               onChange={() => handleToggleComplete(index)}
@@ -111,37 +101,73 @@ const App = () => {
           </li>
         ))}
       </ul>
-      <div className="footer">
-        <div className="checkbox-group">
-          <input
-            type="checkbox"
-            checked={todos.length > 0 && todos.every((todo) => todo.completed)}
-            onChange={handleToggleAllComplete}
-          />
-          <label>Select All</label>
+    );
+  }
+
+  return (
+    <div className={`App ${theme}`}>
+      <div
+        className="background-image"
+        style={{ backgroundImage: `url(${themeImage})` }}
+      >
+        <div className="container">
+          <div className="header">
+            <h1>TODO</h1>
+            <button className="theme-toggle" onClick={handleThemeChange}>
+              <img src={themeIcon} alt="Theme Icon" />
+            </button>
+          </div>
+
+          <div className="main">
+            <div className="input-group">
+              <input
+                type="text"
+                value={inputText}
+                onChange={handleInputChange}
+                onKeyPress={handleInputChange}
+                placeholder="Enter a todo"
+              />
+            </div>
+
+            {errorText && <p className="error-text">{errorText}</p>}
+
+            <div className="todo-box">{content}</div>
+
+            <div className="footer">
+              <div className="item-count">{activeItemCount} items left</div>
+
+              <div className="filter-options">
+                <button
+                  className={filter === "all" ? "active" : ""}
+                  onClick={() => handleFilterChange("all")}
+                >
+                  All
+                </button>
+
+                <button
+                  className={filter === "active" ? "active" : ""}
+                  onClick={() => handleFilterChange("active")}
+                >
+                  Active
+                </button>
+
+                <button
+                  className={filter === "completed" ? "active" : ""}
+                  onClick={() => handleFilterChange("completed")}
+                >
+                  Completed
+                </button>
+              </div>
+
+              <button
+                className="clear-completed"
+                onClick={handleClearCompleted}
+              >
+                Clear Completed
+              </button>
+            </div>
+          </div>
         </div>
-        <p>{activeItemCount} items left</p>
-        <div>
-          <button
-            className={filter === "all" ? "active" : ""}
-            onClick={() => handleFilterChange("all")}
-          >
-            All
-          </button>
-          <button
-            className={filter === "active" ? "active" : ""}
-            onClick={() => handleFilterChange("active")}
-          >
-            Active
-          </button>
-          <button
-            className={filter === "completed" ? "active" : ""}
-            onClick={() => handleFilterChange("completed")}
-          >
-            Completed
-          </button>
-        </div>
-        <button onClick={handleClearCompleted}>Clear Completed</button>
       </div>
     </div>
   );

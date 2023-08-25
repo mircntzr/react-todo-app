@@ -1,0 +1,8 @@
+.App {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 500px;
+  margin: 0 auto;
+  margin-top: 7rem;
+}
